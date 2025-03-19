@@ -36,7 +36,7 @@ def path_to(lib=2,source=1):
     assert os.path.exists(path),f"Le chemin trouve sur Kaggle est indisponible : {path}"
 
     apple_rep=[]
-    pear_pre=[]
+    pear_rep=[]
     exclusions=["Apple Core 1","Apple Rotten 1","Apple hit 1","Pear Stone 1"]
 
     for dir in os.listdir(path):
@@ -46,13 +46,13 @@ def path_to(lib=2,source=1):
                 apple_rep.append(f"/{dir}")
 
             elif dir.startswith("Pear") and dir not in exclusions :
-                pear_pre.append(f"/{dir}")
+                pear_rep.append(f"/{dir}")
 
     with open("rep_apple.txt","w",encoding="utf-8") as apple_file:
-        apple_file.write("\n".join(apple_rep))
+        apple_file.write("\n".join(os.path.join(path, rep) for rep in apple_rep)))
 
     with open("rep_pear.txt","w",encoding="utf-8") as pear_file:
-        pear_file.write("\n".join(pear_pre))
+        pear_file.write("\n".join(os.path.join(path, rep) for rep in pear_rep)))
 
     return path
 
