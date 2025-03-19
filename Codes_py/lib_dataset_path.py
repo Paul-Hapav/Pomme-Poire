@@ -63,5 +63,4 @@ if __name__=="__main__":
     print(f"Debut du programme")
     choix_dataset = int(input("Valeur du dataset : 1 Fruit 360 | autre : Autre dataset"))
     train_or_test = int(input("Valeur du jeu : 1= test | autre = train"))
-    path_to(choix_dataset,train_ot_test)
-    print(f"Fin du Test du programme")
+    print(f"Fin du Test du programme. Le chemin utilisé est : {path_to(choix_dataset,train_or_test)}")
