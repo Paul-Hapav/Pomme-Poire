@@ -1,1 +1,0 @@
-# Premier codes pour découvrir la génération de neurones sur Python
