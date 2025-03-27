@@ -150,40 +150,40 @@ void setupYUV422() {
 }
 
 void loop() {
-    Serial.println(F("READY"));
-    captureImg(WIDTH,HEIGHT,false);
+      Serial.println(F("PHOTO"));
+      captureImg(WIDTH,HEIGHT,false);
 }
 
-void captureImg(uint16_t width, uint16_t height, bool chroma){
+void captureImg(uint16_t width, uint16_t height, bool chroma) {
   byte frame[HEIGHT][WIDTH];
-  uint16_t x,y;
+  uint16_t x, y;
   noInterrupts();
   
-  while(!(REG_PIOB_PDSR & (1 << 21)));  //wait VSYNC high - pin 52 = bit 21 on PortB
-  while((REG_PIOB_PDSR & (1 << 21)));   //wait VSYNC low
-  y = height;
-  while (y--) {
-    x = width;
-    while (x--){
-
-      while ((REG_PIOD_PDSR & (1 << 10)));                    //wait PCLK low - pin 32 = bit 10 on PortD
-      delayMicroseconds(1); 
-      if (!chroma) {frame[y][x] = (REG_PIOC_PDSR & 0xFF000) >> 12;}    //read Y 
-      while (!(REG_PIOD_PDSR & (1 << 10)));                   //wait PCLK high
+  // Attendre le début d'une nouvelle frame
+  while(!(REG_PIOB_PDSR & (1 << 21)));  // Attendre VSYNC haut
+  while((REG_PIOB_PDSR & (1 << 21)));   // Attendre VSYNC bas
+  
+  for (y = 0; y < height; y++) {
+    // Sauter les lignes non désirées si sous-échantillonnage
+    for (x = 0; x < width; x++) {
+      // Attendre le front descendant de PCLK
+      while((REG_PIOD_PDSR & (1 << 10)));
       
-      while ((REG_PIOD_PDSR & (1 << 10)));                    //wait PCLK low
-      delayMicroseconds(1); 
-      if (chroma) {frame[y][x] = (REG_PIOC_PDSR & 0xFF000) >> 12;}    //read Cb or Cr
-      while (!(REG_PIOD_PDSR & (1 << 10)));                   //wait PCLK high  
+      // Lire les données (seulement Y)
+      frame[y][x] = (REG_PIOC_PDSR >> 12) & 0xFF;
+      
+      // Attendre le front montant de PCLK
+      while(!(REG_PIOD_PDSR & (1 << 10)));
+      
+      // Ignorer le composant chroma (Cb ou Cr)
+      while((REG_PIOD_PDSR & (1 << 10)));
+      while(!(REG_PIOD_PDSR & (1 << 10)));
     }
   }
   interrupts();
 
-  for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++) {
-      Serial.write(frame[y][x]); // Utilisation de Serial.write pour un envoi binaire plus rapide
-    }
-  }
+  // Envoyer les données
+  Serial.write((uint8_t*)frame, width * height);
 }
 
 uint16_t grayscaleToRGB565(uint8_t gray) {
