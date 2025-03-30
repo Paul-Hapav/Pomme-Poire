@@ -11,7 +11,7 @@ os.makedirs(output_folder, exist_ok=True)
 
 # Paramètres initiaux du crop (modifiable avec les flèches)
 crop_x, crop_y = 50, 50
-crop_w, crop_h = 240, 320  # Taille fixe
+crop_w, crop_h = 240, 320  # Taille fixe avec un ratio 4:3
 
 # Sensibilité des déplacements
 delta_move = 10
@@ -73,12 +73,16 @@ def crop_images():
                 crop_x = min(w - crop_w, crop_x + delta_move)  # Empêcher de dépasser le bord droit
                 print(f"Rectangle déplacé vers la droite : crop_x={crop_x}, crop_y={crop_y}")
             elif key == ord('a'):  # Touche 'a' pour diminuer la taille du rectangle
-                crop_w = max(10, crop_w - delta_move)  # Empêcher une largeur trop petite
-                crop_h = max(10, crop_h - delta_move)  # Empêcher une hauteur trop petite
+                new_crop_w = max(10, crop_w - delta_move)  # Empêcher une largeur trop petite
+                new_crop_h = int(new_crop_w * 4 / 3)  # Ajuster la hauteur pour conserver le ratio 4:3
+                if crop_x + new_crop_w <= w and crop_y + new_crop_h <= h:  # Vérifier les limites
+                    crop_w, crop_h = new_crop_w, new_crop_h
                 print(f"Taille du rectangle diminuée : crop_w={crop_w}, crop_h={crop_h}")
             elif key == ord('e'):  # Touche 'e' pour augmenter la taille du rectangle
-                crop_w = min(w - crop_x, crop_w + delta_move)  # Empêcher de dépasser la largeur de l'image
-                crop_h = min(h - crop_y, crop_h + delta_move)  # Empêcher de dépasser la hauteur de l'image
+                new_crop_w = min(w - crop_x, crop_w + delta_move)  # Empêcher de dépasser la largeur de l'image
+                new_crop_h = int(new_crop_w * 4 / 3)  # Ajuster la hauteur pour conserver le ratio 4:3
+                if crop_x + new_crop_w <= w and crop_y + new_crop_h <= h:  # Vérifier les limites
+                    crop_w, crop_h = new_crop_w, new_crop_h
                 print(f"Taille du rectangle augmentée : crop_w={crop_w}, crop_h={crop_h}")
             
         cv2.destroyAllWindows()
